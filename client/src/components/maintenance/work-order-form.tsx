@@ -191,7 +191,7 @@ export function WorkOrderForm({ initialData, isEdit = false, workOrderId, presel
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Non assigné</SelectItem>
+                        <SelectItem value="none">Non assigné</SelectItem>
                         {technicians.map((tech: any) => (
                           <SelectItem key={tech.id} value={tech.id.toString()}>
                             {tech.name}
@@ -320,7 +320,7 @@ export function WorkOrderForm({ initialData, isEdit = false, workOrderId, presel
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Aucun</SelectItem>
+                          <SelectItem value="none">Aucun</SelectItem>
                           {schedules.map((schedule: any) => (
                             <SelectItem key={schedule.id} value={schedule.id.toString()}>
                               {schedule.title}

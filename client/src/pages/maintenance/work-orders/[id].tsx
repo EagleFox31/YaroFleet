@@ -426,8 +426,8 @@ export default function WorkOrderDetails({ params }: { params: { id: string } })
                     <div className="space-y-2">
                       <Label htmlFor="part">Pièce</Label>
                       <Select 
-                        value={selectedPartId?.toString() || ""} 
-                        onValueChange={(value) => setSelectedPartId(value ? parseInt(value) : null)}
+                        value={selectedPartId?.toString() || "none"} 
+                        onValueChange={(value) => setSelectedPartId(value !== "none" ? parseInt(value) : null)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner une pièce" />

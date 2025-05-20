@@ -31,8 +31,8 @@ export function formatPrice(price: number | undefined): string {
   
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2,
+    currency: 'XAF',
+    minimumFractionDigits: 0,
   }).format(price);
 }
 

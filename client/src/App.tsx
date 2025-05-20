@@ -25,6 +25,8 @@ import InventoryNew from "@/pages/inventory/new";
 import InventoryDetails from "@/pages/inventory/[id]";
 import FuelIndex from "@/pages/fuel/index";
 import FuelNew from "@/pages/fuel/new";
+import TechniciansIndex from "@/pages/technicians/index";
+import ReportsIndex from "@/pages/reports/index";
 import Settings from "@/pages/settings";
 
 function PrivateRoute({ component: Component, ...rest }: { component: React.ComponentType<any>, [key: string]: any }) {
@@ -147,6 +149,18 @@ function App() {
             <Route path="/fuel/new">
               <AppLayout>
                 <PrivateRoute component={FuelNew} />
+              </AppLayout>
+            </Route>
+            
+            <Route path="/technicians">
+              <AppLayout>
+                <PrivateRoute component={TechniciansIndex} />
+              </AppLayout>
+            </Route>
+            
+            <Route path="/reports">
+              <AppLayout>
+                <PrivateRoute component={ReportsIndex} />
               </AppLayout>
             </Route>
             

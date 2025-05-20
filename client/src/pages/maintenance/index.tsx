@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -20,16 +20,28 @@ export default function MaintenanceIndex() {
   // Fetch upcoming maintenance schedules
   const { data: upcomingMaintenances, isLoading: isLoadingUpcoming } = useQuery({
     queryKey: ["/api/maintenance-schedules", { status: "upcoming" }],
+    queryFn: async () => {
+      const res = await fetch("/api/maintenance-schedules?status=upcoming");
+      return res.json();
+    },
   });
   
   // Fetch overdue maintenance schedules
   const { data: overdueMaintenances, isLoading: isLoadingOverdue } = useQuery({
     queryKey: ["/api/maintenance-schedules", { status: "overdue" }],
+    queryFn: async () => {
+      const res = await fetch("/api/maintenance-schedules?status=overdue");
+      return res.json();
+    },
   });
   
   // Fetch all maintenance schedules
   const { data: allMaintenances, isLoading: isLoadingAll } = useQuery({
     queryKey: ["/api/maintenance-schedules", { search: searchTerm }],
+    queryFn: async () => {
+      const res = await fetch(`/api/maintenance-schedules?search=${encodeURIComponent(searchTerm)}`);
+      return res.json();
+    },
   });
   
   const handleCreateMaintenance = () => {

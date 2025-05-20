@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { VehicleForm } from "@/components/vehicles/vehicle-form";
 

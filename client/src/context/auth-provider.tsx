@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { getCurrentUser, login as apiLogin, logout as apiLogout, LoginCredentials, User } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 

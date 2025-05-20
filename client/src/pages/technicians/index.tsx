@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@/components/layout/page-header";
 import { DataTable } from "@/components/ui/data-table";
@@ -28,8 +28,19 @@ export default function TechniciansIndex() {
     password: ""
   });
 
+  // Define the technician type
+  type Technician = {
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+    role: string;
+    createdAt: string;
+    // Add other fields if needed
+  };
+
   // Fetch technicians
-  const { data: technicians = [], isLoading, refetch } = useQuery({
+  const { data: technicians = [], isLoading, refetch } = useQuery<Technician[]>({
     queryKey: ["/api/users/technicians"],
   });
 
@@ -74,43 +85,46 @@ export default function TechniciansIndex() {
   const columns = [
     {
       header: "Nom",
-      accessorKey: "name",
-      cell: (value: string) => <div className="font-medium">{value}</div>,
+      accessorKey: "name" as keyof Technician,
+      cell: ({ row }: { row: { original: Technician } }) => <div className="font-medium">{row.original.name}</div>,
     },
     {
       header: "Identifiant",
-      accessorKey: "username",
-      cell: (value: string) => <div>{value}</div>,
+      accessorKey: "username" as keyof Technician,
+      cell: ({ row }: { row: { original: Technician } }) => <div>{row.original.username}</div>,
     },
     {
       header: "Email",
-      accessorKey: "email",
-      cell: (value: string) => <div>{value}</div>,
+      accessorKey: "email" as keyof Technician,
+      cell: ({ row }: { row: { original: Technician } }) => <div>{row.original.email}</div>,
     },
     {
       header: "Rôle",
-      accessorKey: "role",
-      cell: (value: string) => (
-        <Badge variant={
-          value === "admin" ? "destructive" :
-          value === "workshop_manager" ? "default" :
-          value === "technician" ? "warning" : "secondary"
-        }>
-          {value === "admin" ? "Administrateur" :
-           value === "workshop_manager" ? "Chef d'atelier" :
-           value === "technician" ? "Technicien" : "Utilisateur"}
-        </Badge>
-      ),
+      accessorKey: "role" as keyof Technician,
+      cell: ({ row }: { row: { original: Technician } }) => {
+        const value = row.original.role;
+        return (
+          <Badge variant={
+            value === "admin" ? "destructive" :
+            value === "workshop_manager" ? "default" :
+            value === "technician" ? "warning" : "secondary"
+          }>
+            {value === "admin" ? "Administrateur" :
+             value === "workshop_manager" ? "Chef d'atelier" :
+             value === "technician" ? "Technicien" : "Utilisateur"}
+          </Badge>
+        );
+      },
     },
     {
       header: "Créé le",
-      accessorKey: "createdAt",
-      cell: (value: string) => <div>{formatDate(value)}</div>,
+      accessorKey: "createdAt" as keyof Technician,
+      cell: ({ row }: { row: { original: Technician } }) => <div>{formatDate(row.original.createdAt)}</div>,
     },
     {
       header: "Actions",
-      accessorKey: "id",
-      cell: (value: number) => (
+      accessorKey: "id" as keyof Technician,
+      cell: ({ row }: { row: { original: Technician } }) => (
         <div className="flex space-x-2">
           <Button
             variant="ghost"

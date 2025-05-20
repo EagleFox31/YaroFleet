@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { FuelRecordForm } from "@/components/fuel/fuel-record-form";
 import { useLocation } from "wouter";

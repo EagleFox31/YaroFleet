@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,16 @@ export default function WorkOrdersIndex() {
   const [, setLocation] = useLocation();
   const [period, setPeriod] = useState("month");
   
+  // Define the type for work order statistics
+  type WorkOrderStats = {
+    pending: number;
+    inProgress: number;
+    completed: number;
+    cancelled: number;
+  };
+
   // Fetch work order statistics
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<WorkOrderStats>({
     queryKey: ["/api/work-orders/statistics", period],
   });
   

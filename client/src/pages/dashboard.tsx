@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { KPICard } from "@/components/dashboard/kpi-card";
 import { FleetStatusChart } from "@/components/dashboard/fleet-status-chart";
@@ -7,11 +7,29 @@ import { VehicleTable } from "@/components/vehicles/vehicle-table";
 import { useQuery } from "@tanstack/react-query";
 import { formatPrice, formatNumber } from "@/lib/utils";
 
+// Define AlertItem type to match AlertsPanel's requirements
+type AlertItem = {
+  id: number;
+  message: string;
+  title: string;
+  priority: string;
+  isRead: boolean;
+  type?: string;
+  createdAt?: string;
+  // Add other fields as required by AlertsPanel
+};
+
+type FleetStats = {
+  operational: number;
+  maintenance: number;
+  outOfService: number;
+};
+
 export default function Dashboard() {
   const [period, setPeriod] = useState("month");
   
   // Fetch fleet statistics
-  const { data: fleetStats } = useQuery({
+  const { data: fleetStats } = useQuery<FleetStats>({
     queryKey: ["/api/statistics/fleet"],
   });
   
@@ -21,17 +39,17 @@ export default function Dashboard() {
   });
   
   // Fetch maintenance cost
-  const { data: costData } = useQuery({
+  const { data: costData } = useQuery<{ cost: number }>({
     queryKey: ["/api/statistics/maintenance-cost", period],
   });
   
   // Fetch alerts
-  const { data: alerts = [] } = useQuery({
+  const { data: alerts = [] } = useQuery<AlertItem[]>({
     queryKey: ["/api/alerts/unread"],
   });
   
   // Fetch fleet status history for chart
-  const { data: fleetStatusHistory = [] } = useQuery({
+  const { data: fleetStatusHistory = [] } = useQuery<any[]>({
     queryKey: ["/api/statistics/fleet-history", period],
   });
   

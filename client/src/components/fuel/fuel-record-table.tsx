@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { formatDate, formatPrice, formatDistance, calculateFuelConsumption, formatFuelConsumption } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+// Define DataTableColumn type locally since it's not exported from data-table
+type DataTableColumn<T> = {
+  header: string;
+  accessorKey: keyof T | string;
+  cell?: (value: any, row: T) => JSX.Element;
+  sortable?: boolean;
+};
 
 interface FuelRecord {
   id: number;
@@ -20,6 +27,7 @@ interface FuelRecord {
     brand: string;
     model: string;
   };
+  consumption?: number | null;
 }
 
 interface FuelRecordTableProps {
@@ -40,7 +48,7 @@ export function FuelRecordTable({ onRowClick, vehicleId }: FuelRecordTableProps)
   const { data, isLoading } = useQuery({ queryKey });
   
   // Handle data structure differences between endpoints
-  const records = data || [];
+  const records: FuelRecord[] = Array.isArray(data) ? data : [];
   const previousRecords = [...records].sort((a, b) => 
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
@@ -70,21 +78,23 @@ export function FuelRecordTable({ onRowClick, vehicleId }: FuelRecordTableProps)
   
   const handleAddRecord = () => {
     const baseUrl = "/fuel/new";
-    setLocation(vehicleId ? `${baseUrl}?vehicleId=${vehicleId}` : baseUrl);
   };
   
-  const columns = [
+  // Import the DataTableColumn type if not already imported:
+  // import type { DataTableColumn } from "@/components/ui/data-table";
+
+  const columns: import("@/components/ui/data-table").DataTableColumn<FuelRecord>[] = [
     {
       header: "Date",
       accessorKey: "date",
-      cell: (value: string) => <div className="text-sm">{formatDate(value)}</div>,
+      cell: (value: FuelRecord["date"]) => <div className="text-sm">{formatDate(value)}</div>,
       sortable: true,
     },
     ...(!vehicleId ? [
       {
         header: "Véhicule",
         accessorKey: "vehicleId",
-        cell: (value: number, row: FuelRecord) => (
+        cell: (value: FuelRecord["vehicleId"], row: FuelRecord) => (
           <div>
             <div className="text-sm">{row.vehicle?.registrationNumber || `#${value}`}</div>
             {row.vehicle && (
@@ -99,25 +109,25 @@ export function FuelRecordTable({ onRowClick, vehicleId }: FuelRecordTableProps)
     {
       header: "Kilométrage",
       accessorKey: "mileage",
-      cell: (value: number) => <div className="text-sm">{formatDistance(value)}</div>,
+      cell: (value: FuelRecord["mileage"]) => <div className="text-sm">{formatDistance(value)}</div>,
       sortable: true,
     },
     {
       header: "Quantité",
       accessorKey: "quantity",
-      cell: (value: number) => <div className="text-sm">{value.toFixed(2)} L</div>,
+      cell: (value: FuelRecord["quantity"]) => <div className="text-sm">{value.toFixed(2)} L</div>,
       sortable: true,
     },
     {
       header: "Coût",
       accessorKey: "cost",
-      cell: (value: number) => <div className="text-sm">{formatPrice(value)}</div>,
+      cell: (value: FuelRecord["cost"]) => <div className="text-sm">{formatPrice(value)}</div>,
       sortable: true,
     },
     {
       header: "Consommation",
       accessorKey: "consumption",
-      cell: (value: number | null) => (
+      cell: (value: FuelRecord["consumption"]) => (
         <div className="text-sm">
           {formatFuelConsumption(value)}
         </div>
@@ -126,7 +136,7 @@ export function FuelRecordTable({ onRowClick, vehicleId }: FuelRecordTableProps)
     {
       header: "Plein",
       accessorKey: "fullTank",
-      cell: (value: boolean) => (
+      cell: (value: FuelRecord["fullTank"]) => (
         <Badge variant={value ? "success" : "neutral"}>
           {value ? "Complet" : "Partiel"}
         </Badge>
@@ -135,7 +145,7 @@ export function FuelRecordTable({ onRowClick, vehicleId }: FuelRecordTableProps)
     {
       header: "Actions",
       accessorKey: "id",
-      cell: (value: number, row: FuelRecord) => (
+      cell: (value: FuelRecord["id"], row: FuelRecord) => (
         <div className="flex space-x-2">
           <Button
             variant="ghost"

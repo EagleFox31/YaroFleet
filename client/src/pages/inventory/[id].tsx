@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -28,6 +28,19 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
+type Part = {
+  id: number;
+  name: string;
+  reference: string;
+  quantity: number;
+  minQuantity: number;
+  unitPrice: number;
+  description?: string;
+  location?: string;
+  supplier?: string;
+  [key: string]: any;
+};
+
 export default function PartDetails({ params }: { params: { id: string } }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -39,11 +52,11 @@ export default function PartDetails({ params }: { params: { id: string } }) {
   
   const partId = parseInt(params.id);
   
-  const { data: part, isLoading } = useQuery({
+  const { data: part, isLoading } = useQuery<Part>({
     queryKey: [`/api/parts/${partId}`],
   });
   
-  const { data: usageHistory = [] } = useQuery({
+  const { data: usageHistory = [] } = useQuery<any[]>({
     queryKey: [`/api/parts/${partId}/usage-history`],
   });
   

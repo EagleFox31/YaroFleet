@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,19 +15,34 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer
-} from "recharts";
+} from "recharts/es6";
 
 export default function FuelIndex() {
   const [, setLocation] = useLocation();
   const [period, setPeriod] = useState("month");
   
+  // Define the type for fuel statistics
+  type FuelStats = {
+    totalRecords: number;
+    totalQuantity: number;
+    totalCost: number;
+    averageConsumption: number;
+  };
+
   // Fetch fuel statistics
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<FuelStats>({
     queryKey: ["/api/fuel-records/statistics", period],
   });
   
+  // Define the type for fuel history items
+  type FuelHistoryItem = {
+    date: string;
+    consumption: number;
+    cost: number;
+  };
+
   // Fetch fuel consumption history for chart
-  const { data: fuelHistory = [] } = useQuery({
+  const { data: fuelHistory = [] } = useQuery<FuelHistoryItem[]>({
     queryKey: ["/api/fuel-records/consumption-history", period],
   });
   

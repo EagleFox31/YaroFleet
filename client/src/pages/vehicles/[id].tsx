@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -38,11 +38,25 @@ export default function VehicleDetails({ params }: { params: { id: string } }) {
   
   const vehicleId = parseInt(params.id);
   
-  const { data: vehicle, isLoading } = useQuery({
+  type Vehicle = {
+    id: number;
+    brand: string;
+    model: string;
+    registrationNumber: string;
+    year: number;
+    mileage: number;
+    status: string;
+    nextMaintenanceDate?: string;
+    nextMaintenanceMileage?: number;
+    fuelType: string;
+    // add any other fields you use from vehicle
+  };
+
+  const { data: vehicle, isLoading } = useQuery<Vehicle>({
     queryKey: [`/api/vehicles/${vehicleId}`],
   });
   
-  const { data: maintenanceSchedules } = useQuery({
+  const { data: maintenanceSchedules } = useQuery<any[]>({
     queryKey: [`/api/maintenance-schedules/vehicle/${vehicleId}`],
   });
   
@@ -223,7 +237,23 @@ export default function VehicleDetails({ params }: { params: { id: string } }) {
               <CardDescription>Modifier les informations du véhicule</CardDescription>
             </CardHeader>
             <CardContent>
-              <VehicleForm initialData={vehicle} isEdit={true} vehicleId={vehicleId} />
+              <VehicleForm
+                initialData={{
+                  ...vehicle,
+                  status: vehicle.status as "maintenance" | "operational" | "out_of_service" | undefined,
+                  fuelType: (
+                    vehicle.fuelType === "diesel" ||
+                    vehicle.fuelType === "petrol" ||
+                    vehicle.fuelType === "electric" ||
+                    vehicle.fuelType === "hybrid" ||
+                    vehicle.fuelType === "other"
+                  )
+                    ? vehicle.fuelType
+                    : "other",
+                }}
+                isEdit={true}
+                vehicleId={vehicleId}
+              />
             </CardContent>
           </Card>
         </TabsContent>

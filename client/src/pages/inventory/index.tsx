@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,26 @@ import { formatPrice } from "@/lib/utils";
 export default function InventoryIndex() {
   const [, setLocation] = useLocation();
   
+  // Define the type for inventory statistics
+  type InventoryStats = {
+    totalValue: number;
+    totalItems: number;
+  };
+
   // Fetch inventory statistics
-  const { data: stats } = useQuery({
+  const { data: stats } = useQuery<InventoryStats>({
     queryKey: ["/api/parts/statistics"],
   });
   
+  // Define the type for a part (adjust fields as needed)
+  type Part = {
+    id: string;
+    name: string;
+    // add other relevant fields here
+  };
+
   // Fetch low stock parts
-  const { data: lowStockParts = [] } = useQuery({
+  const { data: lowStockParts = [] } = useQuery<Part[]>({
     queryKey: ["/api/parts/low-on-stock"],
   });
   

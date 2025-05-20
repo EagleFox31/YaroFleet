@@ -142,7 +142,7 @@ export function VehicleTable({ onRowClick }: VehicleTableProps) {
     {
       name: "Statut",
       options: [
-        { label: "Tous les statuts", value: "" },
+        { label: "Tous les statuts", value: "all" },
         { label: "Opérationnel", value: "operational" },
         { label: "En maintenance", value: "maintenance" },
         { label: "Hors service", value: "out_of_service" },

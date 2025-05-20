@@ -11,9 +11,18 @@ import {
   insertAlertSchema
 } from "@shared/schema";
 import crypto from "crypto";
-import MemoryStore from "memorystore";
+const memorystore = require("memorystore");
 
-const MemoryStoreSession = MemoryStore(session);
+// Extend express-session types to include userId
+import 'express-session';
+
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
+const MemoryStoreSession = memorystore(session);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session configuration
@@ -162,7 +171,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/vehicles", authenticate, async (req, res) => {
     try {
       const search = req.query.search as string | undefined;
-      const status = req.query.status as string | undefined;
+      const statusParam = req.query.status as string | undefined;
+      const allowedStatuses = ["operational", "maintenance", "out_of_service"] as const;
+      const status = allowedStatuses.includes(statusParam as any) ? statusParam as typeof allowedStatuses[number] : undefined;
       const limit = parseInt(req.query.limit as string || "10");
       const offset = parseInt(req.query.offset as string || "0");
       
@@ -355,8 +366,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Work Order Routes
   app.get("/api/work-orders", authenticate, async (req, res) => {
     try {
-      const status = req.query.status as string | undefined;
-      const priority = req.query.priority as string | undefined;
+      const allowedStatuses = ["pending", "in_progress", "completed", "cancelled"] as const;
+      const allowedPriorities = ["low", "medium", "high", "critical"] as const;
+      const statusParam = req.query.status as string | undefined;
+      const priorityParam = req.query.priority as string | undefined;
+      const status = allowedStatuses.includes(statusParam as any) ? statusParam as typeof allowedStatuses[number] : undefined;
+      const priority = allowedPriorities.includes(priorityParam as any) ? priorityParam as typeof allowedPriorities[number] : undefined;
       const limit = parseInt(req.query.limit as string || "10");
       const offset = parseInt(req.query.offset as string || "0");
       

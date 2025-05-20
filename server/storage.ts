@@ -110,7 +110,9 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getUsersByRole(role: string): Promise<User[]> {
-    return await db.select().from(users).where(eq(users.role, role));
+    return await db.select().from(users).where(
+      eq(users.role, role as "admin" | "workshop_manager" | "technician" | "user")
+    );
   }
   
   // Vehicle methods
@@ -127,12 +129,17 @@ export class DatabaseStorage implements IStorage {
     return vehicle;
   }
   
-  async getVehicles(search?: string, status?: string, limit = 10, offset = 0): Promise<{ vehicles: Vehicle[], total: number }> {
-    let query = db.select().from(vehicles).orderBy(desc(vehicles.createdAt));
+  async getVehicles(
+    search?: string,
+    status?: "operational" | "maintenance" | "out_of_service",
+    limit = 10,
+    offset = 0
+  ): Promise<{ vehicles: Vehicle[], total: number }> {
+    let query = db.select().from(vehicles);
     let countQuery = db.select({ count: sql<number>`count(*)` }).from(vehicles);
-    
+
     const conditions = [];
-    
+
     if (search) {
       const likeSearch = `%${search}%`;
       conditions.push(
@@ -143,22 +150,24 @@ export class DatabaseStorage implements IStorage {
         )
       );
     }
-    
+
     if (status) {
       conditions.push(eq(vehicles.status, status));
     }
-    
+
     if (conditions.length > 0) {
-      const whereClause = conditions.reduce((acc, condition) => and(acc, condition));
-      query = query.where(whereClause);
-      countQuery = countQuery.where(whereClause);
+      const whereClause = conditions.length === 1
+        ? conditions[0]
+        : conditions.reduce((acc, condition) => and(acc, condition))!;
+      query = db.select().from(vehicles).where(whereClause);
+      countQuery = db.select({ count: sql<number>`count(*)` }).from(vehicles).where(whereClause);
     }
-    
-    query = query.limit(limit).offset(offset);
-    
+
+    query = query.orderBy(desc(vehicles.createdAt)).limit(limit).offset(offset);
+
     const results = await query;
     const [{ count }] = await countQuery;
-    
+
     return { vehicles: results, total: count };
   }
   
@@ -248,7 +257,12 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(workOrders.createdAt));
   }
   
-  async getWorkOrders(status?: string, priority?: string, limit = 10, offset = 0): Promise<{ workOrders: WorkOrder[], total: number }> {
+  async getWorkOrders(
+    status?: "pending" | "in_progress" | "completed" | "cancelled",
+    priority?: "low" | "medium" | "high" | "critical",
+    limit = 10,
+    offset = 0
+  ): Promise<{ workOrders: WorkOrder[], total: number }> {
     let query = db.select().from(workOrders).orderBy(desc(workOrders.createdAt));
     let countQuery = db.select({ count: sql<number>`count(*)` }).from(workOrders);
     
@@ -263,12 +277,12 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (conditions.length > 0) {
-      const whereClause = conditions.reduce((acc, condition) => and(acc, condition));
+      const whereClause = conditions.reduce((acc, condition) => and(acc, condition))!;
       query = query.where(whereClause);
       countQuery = countQuery.where(whereClause);
     }
     
-    query = query.limit(limit).offset(offset);
+    query = query.offset(offset).limit(limit);
     
     const results = await query;
     const [{ count }] = await countQuery;
@@ -578,6 +592,7 @@ export class DatabaseStorage implements IStorage {
   
   async getMaintenanceCompliance(): Promise<{ compliant: number, overdue: number, total: number }> {
     const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10); // 'YYYY-MM-DD'
     
     const compliant = await db
       .select({ count: sql<number>`count(*)` })
@@ -585,7 +600,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         or(
           isNull(vehicles.nextMaintenanceDate),
-          gte(vehicles.nextMaintenanceDate, today)
+          gte(vehicles.nextMaintenanceDate, todayStr)
         )
       );
     
@@ -595,7 +610,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           sql`${vehicles.nextMaintenanceDate} is not null`,
-          lte(vehicles.nextMaintenanceDate, today)
+          lte(vehicles.nextMaintenanceDate, todayStr)
         )
       );
     
